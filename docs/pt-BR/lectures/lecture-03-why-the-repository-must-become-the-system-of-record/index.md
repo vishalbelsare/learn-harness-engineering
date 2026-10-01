@@ -5,6 +5,8 @@
 
 # Aula 03. Tornando o Repositório a Fonte Única da Verdade
 
+> Orientação de engenharia: os limites numéricos são valores didáticos ajustáveis, não fronteiras demonstradas. Tokens dependem do tokenizador e do conteúdo, não apenas das linhas.
+
 As decisões de arquitetura da sua equipe estão espalhadas entre Confluence, Slack, Jira e a cabeça de alguns engenheiros mais experientes. Para humanos isso mal funciona — você pode perguntar para um colega, pesquisar no histórico do chat, vasculhar documentação e, se tudo falhar, encontrar alguém na copa para tirar uma dúvida. Mas, para um agente de IA, informações que não estão no repositório simplesmente não existem.
 
 Isso não é exagero. Um agente possui apenas três fontes de entrada: prompts de sistema e descrições de tarefas, conteúdos de arquivos do repositório e saídas de execução de ferramentas. Seu histórico do Slack, tickets do Jira, páginas do Confluence e aquela decisão de arquitetura discutida com um colega numa sexta-feira à tarde — o agente não consegue ver nada disso. Ele não pode “perguntar para alguém” ou “pesquisar no histórico do chat”. Todo o universo de trabalho dele é o próprio repositório. Tudo o que está fora dele é desconhecido.
@@ -98,23 +100,15 @@ Essa analogia vem do gerenciamento de transações em bancos de dados. Pode pare
 - **Isolamento (Isolation)**: Quando múltiplos agentes trabalham em paralelo, projete arquivos de estado de forma a evitar condições de corrida. Uma abordagem simples: cada agente utiliza seu próprio arquivo de progresso, ou cada um trabalha em uma branch git separada. Escritas concorrentes no mesmo arquivo são uma fonte comum de problemas.
 - **Durabilidade (Durability)**: Conhecimento crítico do projeto deve viver em arquivos versionados pelo git. Estado temporário pode permanecer apenas na memória da sessão, mas qualquer conhecimento que precise sobreviver entre sessões deve ser escrito em arquivos. O que está apenas na sua cabeça não conta — só o que foi registrado conta.
 
-## Uma História Real de Transformação
+## OpenAI: o repositório como fonte de conhecimento
 
-Uma equipe mantinha uma plataforma de e-commerce com aproximadamente 30 microsserviços. As decisões de arquitetura — protocolos de comunicação entre serviços, estratégias de consistência de dados, regras de versionamento de APIs — estavam espalhadas por:
-- Confluence (parcialmente desatualizado)
-- Slack (difícil de pesquisar)
-- A cabeça de alguns engenheiros seniores (não escalável)
-- Comentários esporádicos no código (não sistemáticos)
+A OpenAI descreve como manteve arquitetura, decisões de projeto, planos de execução e progresso em arquivos versionados ao desenvolver um produto interno com Codex. Conhecimento em conversas ou documentos externos só orienta o agente quando está acessível em seu contexto de trabalho. Um diretório docs estruturado e verificações de atualização e links sustentam essa prática.
 
-Depois de introduzirem agentes de IA, 70% das tarefas exigiam intervenção humana. Quase todas as falhas envolviam o agente violando alguma restrição implícita que “todo mundo conhece, mas ninguém nunca documentou”. O agente não tinha como saber o que não sabia — ele apenas agia com base no entendimento disponível e acabava caindo em armadilhas.
+É uma prática de engenharia documentada, não uma medição controlada do aumento da taxa de sucesso.
 
-A equipe executou uma transformação:
-1. Criou um `AGENTS.md` na raiz do repositório contendo visão geral do projeto, versões da stack tecnológica e restrições globais rígidas
-2. Adicionou um `ARCHITECTURE.md` em cada diretório de microsserviço descrevendo responsabilidades, interfaces e dependências daquele serviço
-3. Criou um `CONSTRAINTS.md` centralizado usando linguagem explícita com “MUST / MUST NOT” para restrições críticas
-4. Adicionou um `PROGRESS.md` em cada diretório de serviço para rastrear o estado atual do trabalho
+[OpenAI](https://openai.com/index/harness-engineering/)
 
-Após a transformação: o mesmo agente passou a conseguir responder todas as perguntas-chave do projeto em uma sessão limpa, e a qualidade de conclusão das tarefas melhorou significativamente.
+A OpenAI relata cerca de 1.500 PR abertos e integrados em cinco meses por três engenheiros dirigindo Codex, com 3,5 PR por engenheiro por dia. A equipe depois chegou a sete. São resultados do processo inteiro; o efeito isolado da documentação não foi medido. [OpenAI: Harness engineering](https://openai.com/index/harness-engineering/)
 
 ## Principais Conclusões
 
@@ -140,7 +134,7 @@ Após a transformação: o mesmo agente passou a conseguir responder todas as pe
    - Como eu executo isso?
    - Como eu verifico isso?
    - Qual é o progresso atual?
-   
+
    Registre quais perguntas ele não consegue responder e melhore o repositório até que consiga responder todas.
 
 2. **Quantificação da externalização de conhecimento**: Liste todas as decisões e restrições importantes para o desenvolvimento do seu projeto. Marque cada item como “dentro” ou “fora” do repositório. Calcule sua knowledge visibility gap (a proporção de itens fora do repo). Crie um plano para reduzir essa lacuna para menos de 10%.

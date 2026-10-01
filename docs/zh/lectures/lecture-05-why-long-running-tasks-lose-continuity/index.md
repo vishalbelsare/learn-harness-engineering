@@ -5,6 +5,8 @@
 
 # 第五讲. 让跨会话的任务保持上下文连续
 
+> 工程建议：这里的数字阈值是可调整的教学默认值，不是实验确认的分界线。token 数取决于分词器和内容，不能只按行数推算。
+
 你让 Claude Code 帮你实现一个完整的功能，它跑了 30 分钟，做了大部分工作，但上下文快满了。你开个新会话继续，然后发现：它不记得上次做了什么决策、为什么选了方案 A 而不是方案 B、哪些文件已经改过、测试跑到什么状态了。它得花 15 分钟重新探索一遍项目，而且可能跟上次的做法不一致。
 
 这是 AI coding agent 在跨会话任务中面对的真实困境。本节课讲为什么 agent 会"断片"，以及如何通过结构化的状态持久化，让新会话能快速接上上次的工作。
@@ -143,15 +145,15 @@ Anthropic 的实际数据：对于 Sonnet 4.5，上下文焦虑足够严重，�
 
 > 来源：[Anthropic: Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 
-## 实际案例
+## Anthropic：跨编码会话的交接
 
-一个 agent 被要求实现一个带用户认证的博客系统，12 个功能点，预计需要 5 个会话。
+Anthropic 介绍了一个 Claude 网站克隆案例：初始化 agent 将需求展开为 200 多项功能，初始状态都标为未通过，同时创建 init.sh、进度文件和初始 Git 提交。后续编码会话读取进度和 Git 历史，逐步实现功能、验证行为，再为下一次会话留下更新。
 
-**没有状态持久化文件的基线**：会话 1 实现了用户模型和基础路由。会话 2 开始时，agent 不记得认证中间件的接口约定，花了约 15 分钟推断上次的设计意图。到会话 3，累积漂移导致 agent 开始重复已实现的功能。到会话 5，仓库有大量冗余代码，但核心认证功能仍未通过端到端测试。12 个功能点只完成了 7 个，其中 3 个有隐含的正确性问题。
+这个案例记录的是连续性机制，没有报告此前这段文字中的功能完成率、隐藏缺陷率和上下文重建耗时比例。配套代码用于教学模拟，不是模型性能实测。
 
-**有状态持久化文件的对照**：使用进度文件、决策日志、验证记录和 git 检查点。每个会话结束时自动更新状态报告。会话 2 的重建成本降到约 3 分钟。到会话 5，所有 12 个功能点完成且通过验证。
+[Anthropic](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 
-定量对比：重建时间减少约 78%，功能完成率从 58% 提升到 100%，隐含缺陷率从 43% 降到 8%。
+LangChain 报告了一组真实的 harness 改进结果：固定使用 gpt-5.2-codex，在包含 89 个任务的 Terminal Bench 2.0 上，得分从 52.8% 提升到 66.5%，提高 13.7 个百分点。改动包括验证指导、中间件和上下文管理。这是多项 harness 调整的整体结果，不能单独归因于进度文件。 [LangChain: Improving Deep Agents](https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering)
 
 ## 核心要点
 
@@ -168,6 +170,8 @@ Anthropic 的实际数据：对于 Sonnet 4.5，上下文焦虑足够严重，�
 - [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172)
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [HumanLayer: Harness Engineering for Coding Agents](https://www.humanlayer.dev/blog/skill-issue-harness-engineering-for-coding-agents)
+
+- [LangChain: Improving Deep Agents](https://www.langchain.com/blog/improving-deep-agents-with-harness-engineering)
 
 ## 练习
 
